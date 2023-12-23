@@ -278,6 +278,76 @@ class FileHandler:
         else:
             print(f"\n\tError: {studentFileName} not found 😞\n")
     
+    # A FUNCTION TO READ ALL STUDENTS FROM A FILE
+    @classmethod
+    def get_all_student_data(cls, fileName):
+       # CHECK IF THE PARAMETERS ARE OKAY
+            # FILENAME
+        if(type(fileName) != type("fileName")):
+            raise TypeError(f"The file name, {fileName}, must be a string")
+        elif(fileName == ""):
+            raise ValueError("The file name, 1st parameter, must have a value")
+        
+        # CHECK IF PATH TO FILE TO READ FROM EXISTS, IF SO, READ THE DATA, IF NOT, RAISE ERROR
+        print("\nChecking if the student file exists...")
+        folderPath = os.path.join(os.path.dirname(__file__), '..', 'records')
+        filePath = os.path.join(folderPath, fileName)
+
+        if(os.path.exists(filePath)):
+            print("File exists, reading all students' data...\n\nAll the students' general data is as follows...")
+            
+            # READ ALL THE DATA FROM THE FILE
+            with open(filePath, "r") as file:
+                reader = csv.reader(file)
+
+                for row in reader:
+                    # IF EMPTY LINE, SKIP
+                    if(len(row) == 0):
+                        continue
+                    
+                    [student_admission_number, student_name, student_age, student_total_units, student_total_mark, student_average_mark, student_average_grade] = row
+
+                    # SHOW EACH LINE OF CREDIBLE DATA
+                    print(f"\t{student_admission_number}, {student_name}, {student_age}, {student_total_units}, {student_total_mark}, {student_average_mark}, {student_average_grade}")
+        else:
+            print(f"\n\tError: {fileName} not found 😞\n")
+            return 
+    
+    # A FUNCTION TO READ ALL STUDENTS UNITS FROM A FILE
+    @classmethod
+    def get_all_student_units(cls, fileName):
+       # CHECK IF THE PARAMETERS ARE OKAY
+            # FILENAME
+        if(type(fileName) != type("fileName")):
+            raise TypeError(f"The file name, {fileName}, must be a string")
+        elif(fileName == ""):
+            raise ValueError("The file name, 1st parameter, must have a value")
+        
+        # CHECK IF PATH TO SUBSEQUENT FILE TO READ FROM EXISTS, IF SO, READ THE DATA, IF NOT, RAISE ERROR
+        print("\nChecking if the student units file exists...")
+        folderPath = os.path.join(os.path.dirname(__file__), '..', 'records')
+        filePath = os.path.join(folderPath, fileName)
+
+        if(os.path.exists(filePath)):
+            print("File exists, reading all students' units...\n\nAll the students' units are as follows...")
+            
+            # READ ALL THE DATA FROM THE FILE
+            with open(filePath, "r") as file:
+                reader = csv.reader(file)
+
+                for row in reader:
+                    # IF EMPTY LINE, SKIP
+                    if(len(row) == 0):
+                        continue
+                    
+                    [student_admission_number, space_tab, student_recorded_units] = row
+
+                    # SHOW EACH LINE OF CREDIBLE DATA
+                    print(f"\t{student_admission_number}, {space_tab}, {student_recorded_units}")
+        else:
+            print(f"\n\tError: {fileName} not found 😞\n")
+            return 
+    
     # A FUNCTION TO UPDATE DATA INTO A FILE
 
     # A FUNCTION TO DELETE DATA FROM THE FILE

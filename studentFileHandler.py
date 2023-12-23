@@ -123,7 +123,10 @@ def get_student():
         print("\nFetching a random student's data...")
         FileHandler.get_random_student_data("student_data.csv", "student_units.csv")
     else:
-        ...
+        # GETTING DATA FOR ALL STUDENTS
+        print("\nFetching all of the students' data...")
+        FileHandler.get_all_student_data("student_data.csv")
+        FileHandler.get_all_student_units("student_units.csv")
 
 # A FUNCTION TO UPDATE A STUDENT WITHIN THE DATABASE
 
