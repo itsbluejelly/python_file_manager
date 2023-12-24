@@ -9,11 +9,6 @@ FileHandler = FileHandlerClassFile.FileHandler
 # A FUNCTION TO ADD A STUDENT TO THE DATABASE
 def add_student():
     # GETTING STUDENT DETAILS WHICH ARE ADMISSION NUMBER, NAME, AGE AND NUMBER OF UNITS TAKEN
-    student_admission_number = 0
-    student_name = ""
-    student_age = 0
-    student_total_units = 0
-
         # STUDENT ADMISSION NUMBER
     while True:
         try:
@@ -100,9 +95,6 @@ def get_student():
     # MAKING RIGHT DECISION BASED ON SAID CHOICE
     if((choice_of_reading == "A") or (choice_of_reading == "Admission")):
         # GET THE STUDENT ADMISSION NUMBER
-        student_admission_number = 0
-
-            # ADMISSION NUMBER
         while True:
             try:
                 student_admission_number = int(input("\nWhat is the admission number of the student: "))
@@ -129,6 +121,92 @@ def get_student():
         FileHandler.get_all_student_units("student_units.csv")
 
 # A FUNCTION TO UPDATE A STUDENT WITHIN THE DATABASE
+def update_student():
+    # GETTING CHOICE ON HOW TO UPDATE STUDENT
+    while True:
+        try:
+            choice_of_update = input("\nHow would you like to update the data\n\t1. [A] to update a single student via admission number\n\t2. [E] to update every student: ").strip().title()
+        
+            if((choice_of_update != "A") and (choice_of_update != "Admission") and (choice_of_update != "E") and (choice_of_update != "Every")):
+                raise ValueError
+        except ValueError:
+            print("\n\t\tInvalid choice, try again\n")
+        else:
+            break
+        
+    # GETTING VALUE ON WHAT TO UPDATE
+    while True:
+        try:
+            value_to_update = input("\nWhat value would you like to update\n\t1. [N] to update the student's name\n\t2. [A] to update the student's age\n\t3. [T] to update the total number of student's units\n\t4. [E] to update everything: ").strip().title()
+            
+            if((value_to_update != "N") and (value_to_update != "Name") and (value_to_update != "A") and (value_to_update != "Age") and (value_to_update != "T") and (value_to_update != "Total units") and (value_to_update != "E") and (value_to_update != "Everything")):
+                raise ValueError
+        except ValueError:
+            print("\n\t\tInvalid choice, try again\n")
+        else:
+            break
+        
+    # MAKING RIGHT DECISION BASED ON CHOICE OF UPDATE
+    if((choice_of_update == "A") or (choice_of_update == "Admission")):
+        # GET THE STUDENT ADMISSION NUMBER
+        while True:
+            try:
+                student_admission_number = int(input("\nWhat is the admission number of the student: "))
+
+                if not student_admission_number:
+                    raise ValueError
+            except ValueError:
+                print("\n\tThe student admission number must be an integer with a value\n")
+            else:
+                break
+            
+        # MAKING RIGHT DECISION BASED ON VALUE TO UPDATE
+        if((value_to_update == "N") or (value_to_update == "Name")):
+            print(f"\n{student_admission_number}'s old data is as follows...")
+            # GETTING OLD STUDENT CORE DATA
+            old_student = FileHandler.get_admitted_student_data("student_data.csv", student_admission_number)
+            old_student["recorded_units"] = FileHandler.get_admitted_student_units("student_units.csv", student_admission_number)
+            
+            # GETTING THE NEW STUDENT NAME
+            while True:
+                try:
+                    new_student_name = input("\nWhat is the new name of the student: ").strip().title()
+
+                    if(new_student_name == ""):
+                        raise ValueError
+                except ValueError:
+                    print("\n\t\tThe student name must have a value\n")
+                else:
+                    break
+                
+            # IF THE STUDENT NEW NAME IS FINE, CREATE A NEW STUDENT
+            new_student = Student(old_student["admission_number"], new_student_name, old_student["age"], old_student["total_units"])
+            
+            new_student.recorded_units = old_student["recorded_units"]
+            new_student.total_mark = old_student["total_mark"]
+            new_student.average_mark = old_student["average_mark"]
+            new_student.average_grade = old_student["average_grade"]
+            
+            # UPDATE THE FILE WITH THE NEW STUDENT
+            FileHandler.update_student_data("student_data.csv", new_student)
+            print(f"\n{new_student._admission_number}'s units remain the same, the old data is as follows...")
+            FileHandler.get_admitted_student_data("student_units.csv", new_student._admission_number)
+        elif((value_to_update == "A") or (value_to_update == "Age")):
+            ...
+        elif((value_to_update == "T") or (value_to_update == "Total units")):
+            ...
+        else:
+            ...
+    else:
+        # MAKING RIGHT DECISION BASED ON VALUE TO UPDATE
+        if((value_to_update == "N") or (value_to_update == "Name")):
+            ...
+        elif((value_to_update == "A") or (value_to_update == "Age")):
+            ...
+        elif((value_to_update == "T") or (value_to_update == "Total units")):
+            ...
+        else:
+            ...
 
 # A FUNCTION TO DELETE A STUDENT FROM THE DATABASE
 
@@ -155,6 +233,9 @@ def main():
     elif((choice_of_action == "R") or (choice_of_action == "Read")):
         print("\nCurrently fetching a recorded student...")
         get_student()
+    elif((choice_of_action == "U") or (choice_of_action == "Update")):
+        print("\nCurrently updating a recorded student...")
+        update_student()
     else:
         print("In Development")
     

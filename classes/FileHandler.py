@@ -53,7 +53,7 @@ class FileHandler:
         # IF EVERYTHING IS OKAY, ADD THE ROW OF DATA
         with open(filePath, "a", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow([student.admission_number, student.name, student.age, student.total_units, student.total_mark, student.average_mark, student.average_grade])
+            writer.writerow([student._admission_number, student._name, student._age, student._total_units, student.total_mark, student.average_mark, student.average_grade])
             
             print(f"\n{student._name}'s data added to database successfully...\n")
 
@@ -105,7 +105,7 @@ class FileHandler:
             writer = csv.writer(file)
             
             writer.writerow([
-                student.admission_number, 
+                student._admission_number, 
                 "\t", 
                 "; ".join([str(unit) for unit in student.recorded_units])
             ])
@@ -392,6 +392,9 @@ class FileHandler:
                 reader = csv.reader(file)
 
                 for row in reader:
+                    # A LIST CONTAINING THE RECORDED UNITS
+                    recorded_units = []
+                    
                     # IF EMPTY LINE, SKIP
                     if(len(row) == 0):
                         continue
@@ -401,7 +404,7 @@ class FileHandler:
                     # SHOW EACH LINE OF CREDIBLE DATA
                     print(f"\t{student_admission_number}, {space_tab}, {student_recorded_units}")
                     
-                    # CREATE A STUDENT INSTANCE FROM EACH LINE AND APPEND IT TO THE LIST
+                    # CREATE A UNIT INSTANCE FROM EACH LINE AND APPEND IT TO THE STUDENT
                         # IF 1ST ROW, SKIP
                     if(student_admission_number == "Admission number"):
                         continue
@@ -419,16 +422,21 @@ class FileHandler:
                         unit_name = unit_name_dict.split(": ")[1]
                         unit_mark = float(unit_mark_dict.split(": ")[1].replace('}', ''))
                         
-                        # CREATE A STUDENT DICTIONARY AND APPEND IT TO THE RECORDED STUDENTS LIST
-                        student = {
-                            "admission_number": student_admission_number,
-                            "unit": {
-                                "unit_name": unit_name, 
-                                "unit_mark": unit_mark
-                            }
+                        # CREATE A UNIT DICTIONARY AND APPEND IT TO THE STUDENT DICT
+                        unit = {
+                            "unit_name": unit_name, 
+                            "unit_mark": unit_mark
                         }
 
-                        recorded_students.append(student)
+                        recorded_units.append(unit)
+                    
+                    # APPENDING THE LIST TO THE STUDENT
+                    student = {
+                        "admission_number": int(student_admission_number),
+                        "recorded_units": recorded_students
+                    }
+                    
+                    recorded_students.append(student)
                 
                 # RETURN THE LIST OF STUDENTS
                 return recorded_students         
@@ -452,7 +460,7 @@ class FileHandler:
         filePath = os.path.join(folderPath, fileName)
 
         if(os.path.exists(filePath)):
-            print(f"Folder and file exists, checking if {student._name}'s data is already in database...")
+            print(f"Folder and file exists, checking if {student._admission_number}'s data is already in database...")
             # A LIST CONTAINING THE RECORDED STUDENTS DATA
             recorded_data = []
             
@@ -467,18 +475,41 @@ class FileHandler:
                     else:
                         recorded_data.append(row)
                         
-            # PARSE THROUGH THE RECORDED DATA FOR THE DATA OF THE REQUIRED STUDENT
+            # REWRITE FILE WITH A ROW OF TITLES
+            with open(filePath, "w", newline="") as file:
+                writer = csv.writer(file)
+                row_titles = recorded_data[0]
+                writer.writerow(row_titles)
             
+            # PARSE THROUGH THE RECORDED DATA FOR THE DATA OF THE REQUIRED STUDENT, AND UPDATE IT
+            with open(filePath, "a", newline="") as file:
+                writer = csv.writer(file)
+                
+                for row_of_data in recorded_data[1::]:
+                    # CHECK IF ADMISSION NUMBERS ARE SIMILAR, IF SO, AMEND THE DATA, IF NOT, ADD DATA AS IS
+                    student_admission_number = int(row_of_data[0])
+                    
+                    if(student_admission_number == student._admission_number):
+                        row_of_data = [student._admission_number, student._name, student._age, student._total_units, student.total_mark, student.average_mark, student.average_grade]
+                        
+                    writer.writerow(row_of_data)
+                
+                print(f"{student._name}'s data updated successfully...\n")
+            
+            # PRINT THE NEW DATA
+            print(f"\n{student._admission_number}'s new data is as follows...")
+            print(f"\n\tStudent details: \n\t\t[\n\t\t\tStudent name: {student._name},\n\t\t\tStudent Age: {student._age},\n\t\t\tStudent Total Units: {student._total_units},\n\t\t]\n")
+
+            # SHOW TOTAL AND AVERAGE MARK
+            print(f"\t\t-> {student._name}'s total mark obtained from the {student._total_units} units is: {float(student.total_mark):,.2f}")
+            print(f"\t\t-> {student._name}'s average mark obtained from the {float(student.total_mark):,.2f} total mark is: {float(student.average_mark):,.2f}\n")
+
+            # SHOW AVERAGE GRADE
+            print(f"\t\t-> {student._name}'s average grade from an average mark of {float(student.average_mark):,.2f} is: {student.average_grade}\n")
         else:
             print(f"\n\tError: {fileName} not found 😞\n")
             return
-        
-        # IF EVERYTHING IS OKAY, ADD THE ROW OF DATA
-        with open(filePath, "a") as file:
-            writer = csv.writer(file)
-            writer.writerow([student.admission_number, student.name, student.age, student.total_units, student.total_mark, student.average_mark, student.average_grade])
             
-            print(f"\n{student._name}'s data added to database successfully...\n")
     # A FUNCTION TO UPDATE STUDENT UNITS FROM A FILE
 
     # A FUNCTION TO DELETE DATA FROM THE FILE
