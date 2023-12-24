@@ -190,9 +190,37 @@ def update_student():
             # UPDATE THE FILE WITH THE NEW STUDENT
             FileHandler.update_student_data("student_data.csv", new_student)
             print(f"\n{new_student._admission_number}'s units remain the same, the old data is as follows...")
-            FileHandler.get_admitted_student_data("student_units.csv", new_student._admission_number)
+            FileHandler.get_admitted_student_units("student_units.csv", new_student._admission_number)
         elif((value_to_update == "A") or (value_to_update == "Age")):
-            ...
+            print(f"\n{student_admission_number}'s old data is as follows...")
+            # GETTING OLD STUDENT CORE DATA
+            old_student = FileHandler.get_admitted_student_data("student_data.csv", student_admission_number)
+            old_student["recorded_units"] = FileHandler.get_admitted_student_units("student_units.csv", student_admission_number)
+            
+            # GETTING THE NEW STUDENT AGE
+            while True:
+                try:
+                    new_student_age = int(input(f"\t3. What is {student_admission_number}'s new age: "))
+
+                    if(new_student_age < 18):
+                        raise ValueError
+                except ValueError:
+                    print("\n\t\tThe student age must be an integer greater than or equal to 18\n")
+                else:
+                    break
+                
+            # IF THE STUDENT NEW AGE IS FINE, CREATE A NEW STUDENT
+            new_student = Student(old_student["admission_number"], old_student["name"], new_student_age, old_student["total_units"])
+            
+            new_student.recorded_units = old_student["recorded_units"]
+            new_student.total_mark = old_student["total_mark"]
+            new_student.average_mark = old_student["average_mark"]
+            new_student.average_grade = old_student["average_grade"]
+            
+            # UPDATE THE FILE WITH THE NEW STUDENT
+            FileHandler.update_student_data("student_data.csv", new_student)
+            print(f"\n{new_student._admission_number}'s units remain the same, the old data is as follows...")
+            FileHandler.get_admitted_student_units("student_units.csv", new_student._admission_number)
         elif((value_to_update == "T") or (value_to_update == "Total units")):
             ...
         else:
