@@ -44,14 +44,14 @@ class FileHandler:
             os.mkdir(folderPath)
             print("Folder to student file created successfully, creating new file...")
 
-            with open(filePath, "w") as file:
+            with open(filePath, "w", newline="") as file:
                 writer = csv.writer(file)
                 writer.writerow(["Admission number", "Name", "Age", "Total units", "Total mark", "Average mark", "Average grade"])
 
                 print(f"File created successfully, attempting to add {student._name}'s data...")
         
         # IF EVERYTHING IS OKAY, ADD THE ROW OF DATA
-        with open(filePath, "a") as file:
+        with open(filePath, "a", newline="") as file:
             writer = csv.writer(file)
             writer.writerow([student.admission_number, student.name, student.age, student.total_units, student.total_mark, student.average_mark, student.average_grade])
             
@@ -94,14 +94,14 @@ class FileHandler:
         else:
             print("File not found, creating new file...")
             
-            with open(filePath, "w") as file:
+            with open(filePath, "w", newline="") as file:
                 writer = csv.writer(file)
                 writer.writerow(["Admission number", "\t", "Recorded units"])
 
                 print(f"File created successfully, attempting to add {student._name}'s units data...")
         
         # IF EVERYTHING IS OKAY, ADD THE ROW OF DATA
-        with open(filePath, "a") as file:
+        with open(filePath, "a", newline="") as file:
             writer = csv.writer(file)
             
             writer.writerow([
@@ -112,7 +112,7 @@ class FileHandler:
             
             print(f"\n{student._name}'s units added to database successfully...\n")
     
-    # A FUNCTION TO READ ADMITTED STUDENT DATA FROM A FILE
+    # A FUNCTION TO READ ADMITTED STUDENT DATA FROM A FILE AND RETURN DATA
     @classmethod
     def get_admitted_student_data(cls, fileName, admission_number):
         # CHECK IF THE PARAMETERS ARE OKAY
@@ -163,11 +163,23 @@ class FileHandler:
 
                         # SHOW AVERAGE GRADE
                         print(f"\t-> {student_name}'s average grade from an average mark of {float(student_average_mark):,.2f} is: {student_average_grade}\n")
+                        
+                        # RETURN DATA, WHICH IS THE ADMISSION NUMBER, NAME, AGE AND TOTAL UNITS
+                        return {
+                            "admission_number": student_admission_number,
+                            "name": student_name,
+                            "age": int(student_age),
+                            "total_units": int(student_total_units),
+                            "total_mark": float(student_total_mark),
+                            "average_mark": float(student_average_mark),
+                            "average_grade": student_average_grade,
+                        }
+                        
         else:
             print(f"\n\tError: {fileName} not found 😞\n")
             return
             
-    # A FUNCTION TO READ ADMITTED STUDENT UNITS FROM A FILE
+    # A FUNCTION TO READ ADMITTED STUDENT UNITS FROM A FILE AND RETURN RECORDED UNITS
     @classmethod
     def get_admitted_student_units(cls, fileName, admission_number):
         # CHECK IF THE PARAMETERS ARE OKAY
@@ -190,6 +202,8 @@ class FileHandler:
 
         if(os.path.exists(filePath)):
             print(f"File exists, checking if {admission_number}'s units are already in database...")
+            # A LIST CONTAINING THE RECORDED UNITS
+            recorded_units = []
             
             # CHECK IF STUDENT IS ALREADY IN DATABASE, IF SO, READ THE UNITS
             with open(filePath, "r") as file:
@@ -208,23 +222,37 @@ class FileHandler:
 
                         # GET THE STUDENT UNITS FROM THE ROW, AND CHECK WHETHER DELIMIER IS PRESENT
                         student_recorded_units = row[2]
+                        
                         if(student_recorded_units.find("; ")):
                             student_recorded_units = student_recorded_units.split("; ")
+                        else:
+                            student_recorded_units = [student_recorded_units]
                         
                         # SHOW RECORDED UNITS
                         print(f"\n{student_admission_number}'s recorded units are as follows: ")
 
                         for _ in range(len(student_recorded_units)):
+                            # GETTING THE UNIT NAME AND UNIT MARK OF EACH STUDENT
                             [unit_name_dict, unit_mark_dict] = student_recorded_units[_].split(", ")
                             unit_name = unit_name_dict.split(": ")[1]
                             unit_mark = float(unit_mark_dict.split(": ")[1].replace('}', ''))
+                            
+                            # CREATE A UNIT DICTIONARY AND APPEND IT TO THE RECORDED UNITS LIST
+                            unit = {
+                                "unit_name": unit_name, 
+                                "unit_mark": unit_mark
+                            }
 
+                            recorded_units.append(unit)
+
+                            # SHOW OUTPUT OF RECORDED DATA, AND RETURN THE LIST
                             print(f"\t{_+1}. {unit_name}: {unit_mark:,.2f}")
+                            return recorded_units
         else:
             print(f"\n\tError: {fileName} not found 😞\n")
             return
             
-    # A FUNCTION TO GENERATE A RANDOM STUDENT ADMISSION NUMBER, AND READ STUDENT'S DATA AND UNITS FROM IT
+    # A FUNCTION TO GENERATE A RANDOM STUDENT, READ STUDENT'S DATA AND UNITS AND RETURN A STUDENT
     @classmethod
     def get_random_student_data(cls, studentFileName, unitsFileName):
         # CHECK IF THE PARAMETERS ARE OKAY
@@ -272,13 +300,17 @@ class FileHandler:
                 random.shuffle(recorded_admission_numbers)
                 random_admission_number = recorded_admission_numbers[0]
                 
+                # READING DATA AND RETURNING A STUDENT
                 print(f"Random admission number {random_admission_number} picked, reading the student data...")
-                cls.get_admitted_student_data(studentFileName, random_admission_number)
-                cls.get_admitted_student_units(unitsFileName, random_admission_number)
+                student = cls.get_admitted_student_data(studentFileName, random_admission_number)
+                student["recorded_units"] = cls.get_admitted_student_units(unitsFileName, random_admission_number)
+                
+                # RETURNING CORE STUDENT DATA
+                return student
         else:
             print(f"\n\tError: {studentFileName} not found 😞\n")
     
-    # A FUNCTION TO READ ALL STUDENTS FROM A FILE
+    # A FUNCTION TO READ ALL STUDENTS FROM A FILE AND RETURN AN ARRAY OF EACH STUDENT'S DATA
     @classmethod
     def get_all_student_data(cls, fileName):
        # CHECK IF THE PARAMETERS ARE OKAY
@@ -295,6 +327,8 @@ class FileHandler:
 
         if(os.path.exists(filePath)):
             print("File exists, reading all students' data...\n\nAll the students' general data is as follows...")
+            # A LIST CONTAINING THE RECORDED STUDENTS AND THEIR DATA
+            recorded_students = []
             
             # READ ALL THE DATA FROM THE FILE
             with open(filePath, "r") as file:
@@ -309,11 +343,31 @@ class FileHandler:
 
                     # SHOW EACH LINE OF CREDIBLE DATA
                     print(f"\t{student_admission_number}, {student_name}, {student_age}, {student_total_units}, {student_total_mark}, {student_average_mark}, {student_average_grade}")
+                    
+                    # CREATE A STUDENT INSTANCE FROM EACH LINE AND APPEND IT TO THE LIST
+                        # IF 1ST ROW, SKIP
+                    if(student_admission_number == "Admission number"):
+                        continue
+                    else:
+                        student = {
+                            "admission_number": int(student_admission_number),
+                            "name": student_name,
+                            "age": int(student_age),
+                            "total_units": int(student_total_units),
+                            "total_mark": float(student_total_mark),
+                            "average_mark": float(student_average_mark),
+                            "average_grade": student_average_grade,
+                        }
+                        
+                        recorded_students.append(student)
+                
+                # RETURN THE LIST OF STUDENTS
+                return recorded_students
         else:
             print(f"\n\tError: {fileName} not found 😞\n")
             return 
     
-    # A FUNCTION TO READ ALL STUDENTS UNITS FROM A FILE
+    # A FUNCTION TO READ ALL STUDENTS UNITS FROM A FILE AND RETURN AN ARRAY OF EACH STUDENT'S UNITS
     @classmethod
     def get_all_student_units(cls, fileName):
        # CHECK IF THE PARAMETERS ARE OKAY
@@ -330,6 +384,8 @@ class FileHandler:
 
         if(os.path.exists(filePath)):
             print("File exists, reading all students' units...\n\nAll the students' units are as follows...")
+            # A LIST CONTAINING THE RECORDED STUDENTS AND THEIR UNITS
+            recorded_students = []
             
             # READ ALL THE DATA FROM THE FILE
             with open(filePath, "r") as file:
@@ -344,11 +400,86 @@ class FileHandler:
 
                     # SHOW EACH LINE OF CREDIBLE DATA
                     print(f"\t{student_admission_number}, {space_tab}, {student_recorded_units}")
+                    
+                    # CREATE A STUDENT INSTANCE FROM EACH LINE AND APPEND IT TO THE LIST
+                        # IF 1ST ROW, SKIP
+                    if(student_admission_number == "Admission number"):
+                        continue
+                    
+                    # CRETE A LIST OF UNITS FROM THE RECORDED UNITS STRING, IN STRING FORMAT
+                    if(student_recorded_units.find("; ")):
+                        student_recorded_units = student_recorded_units.split("; ")
+                    else:
+                        student_recorded_units = [student_recorded_units]
+
+                    # CREATING A DICT OF A STUDENT FROM EACH ROW
+                    for _ in range(len(student_recorded_units)):
+                        # GETTING THE UNIT NAME AND UNIT MARK OF EACH STUDENT
+                        [unit_name_dict, unit_mark_dict] = student_recorded_units[_].split(", ")
+                        unit_name = unit_name_dict.split(": ")[1]
+                        unit_mark = float(unit_mark_dict.split(": ")[1].replace('}', ''))
+                        
+                        # CREATE A STUDENT DICTIONARY AND APPEND IT TO THE RECORDED STUDENTS LIST
+                        student = {
+                            "admission_number": student_admission_number,
+                            "unit": {
+                                "unit_name": unit_name, 
+                                "unit_mark": unit_mark
+                            }
+                        }
+
+                        recorded_students.append(student)
+                
+                # RETURN THE LIST OF STUDENTS
+                return recorded_students         
         else:
             print(f"\n\tError: {fileName} not found 😞\n")
             return 
     
-    # A FUNCTION TO UPDATE DATA INTO A FILE
+    # A FUNCTION TO UPDATE STUDENT DATA FROM A FILE
+    @classmethod
+    def update_student_data(cls, fileName, student):
+        # CHECKING IF PARAMETER VALUES ARE OK
+            # FILENAME
+        if(type(fileName) != type("fileName")):
+            raise TypeError(f"The file name, {fileName}, must be a string")
+        elif(fileName == ""):
+            raise ValueError("The file name, 1st parameter, must have a value")
+        
+        # CHECK IF FOLDER TO FILE EXISTS, IF SO, CHECK IF STUDENT EXISTS IN DATABASE, IF NOT, RAISE AN ERROR
+        print("\nChecking if the folder to student file exists...")
+        folderPath = os.path.join(os.path.dirname(__file__), '..', 'records')
+        filePath = os.path.join(folderPath, fileName)
+
+        if(os.path.exists(filePath)):
+            print(f"Folder and file exists, checking if {student._name}'s data is already in database...")
+            # A LIST CONTAINING THE RECORDED STUDENTS DATA
+            recorded_data = []
+            
+            # APPEND THE DATA TO LIST
+            with open(filePath, "r") as file:
+                reader = csv.reader(file)
+
+                for row in reader:
+                    # IF 1ST ROW OR AN EMPTY LINE, SKIP, ELSE ADD TO LIST THE DATA ROW
+                    if((len(row) == 0)):
+                        continue
+                    else:
+                        recorded_data.append(row)
+                        
+            # PARSE THROUGH THE RECORDED DATA FOR THE DATA OF THE REQUIRED STUDENT
+            
+        else:
+            print(f"\n\tError: {fileName} not found 😞\n")
+            return
+        
+        # IF EVERYTHING IS OKAY, ADD THE ROW OF DATA
+        with open(filePath, "a") as file:
+            writer = csv.writer(file)
+            writer.writerow([student.admission_number, student.name, student.age, student.total_units, student.total_mark, student.average_mark, student.average_grade])
+            
+            print(f"\n{student._name}'s data added to database successfully...\n")
+    # A FUNCTION TO UPDATE STUDENT UNITS FROM A FILE
 
     # A FUNCTION TO DELETE DATA FROM THE FILE
     
