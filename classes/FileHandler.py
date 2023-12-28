@@ -247,7 +247,9 @@ class FileHandler:
 
                             # SHOW OUTPUT OF RECORDED DATA, AND RETURN THE LIST
                             print(f"\t{_+1}. {unit_name}: {unit_mark:,.2f}")
-                            return recorded_units
+                        
+                        # RETURN LIST OF RECORDRD UNITS AFTER LOOPING THROUGHT THE DATA
+                        return recorded_units
         else:
             print(f"\n\tError: {fileName} not found 😞\n")
             return

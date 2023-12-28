@@ -200,7 +200,7 @@ def update_student():
             # GETTING THE NEW STUDENT AGE
             while True:
                 try:
-                    new_student_age = int(input(f"\t3. What is {student_admission_number}'s new age: "))
+                    new_student_age = int(input(f"\nWhat is {student_admission_number}'s new age: "))
 
                     if(new_student_age < 18):
                         raise ValueError
